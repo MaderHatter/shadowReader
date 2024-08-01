@@ -1,5 +1,5 @@
 {
-	"name": "shadow-reader",
+	"name": "statusbar-reader",
 	"displayName": "shadow reader",
 	"description": "摸鱼划水看书，十分隐蔽",
 	"version": "0.8.2",
@@ -12,24 +12,24 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:shadowReader.start"
+		"onCommand:statusbarReader.start"
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/igzhang/shadowReader.git"
+		"url": "https://github.com/igzhang/statusbarReader.git"
 	},
-	"homepage": "https://github.com/igzhang/shadowReader/blob/main/README.md",
+	"homepage": "https://github.com/igzhang/statusbarReader/blob/main/README.md",
 	"main": "./out/extension.js",
 	"contributes": {
 		"configuration": {
 			"title": "shadow reader",
 			"properties": {
-				"shadowReader.pageSize": {
+				"statusbarReader.pageSize": {
 					"type": "number",
 					"default": 50,
 					"description": "每次最多显示字数"
 				},
-				"shadowReader.onlineBookURL": {
+				"statusbarReader.onlineBookURL": {
 					"type": "string",
 					"default": "https://www.biqugee6.com",
 					"enum": [
@@ -42,7 +42,7 @@
 					],
 					"description": "在线书源"
 				},
-				"shadowReader.hiddenTime": {
+				"statusbarReader.hiddenTime": {
 					"type": "number",
 					"default": 30,
 					"description": "自动隐藏时间"
@@ -51,30 +51,30 @@
 		},
 		"keybindings": [
 			{
-				"command": "shadowReader.getNextPage",
+				"command": "statusbarReader.getNextPage",
 				"key": "alt+."
 			},
 			{
-				"command": "shadowReader.getPrevPage",
+				"command": "statusbarReader.getPrevPage",
 				"key": "alt+,"
 			},
 			{
-				"command": "shadowReader.showBossInfo",
+				"command": "statusbarReader.showBossInfo",
 				"key": "alt+/"
 			}
 		],
 		"commands": [
 			{
-				"command": "shadowReader.start",
+				"command": "statusbarReader.start",
 				"title": "开始工作",
-				"category": "shadowReader",
+				"category": "statusbarReader",
 				"icon": "$(book)"
 			}
 		],
 		"menus": {
 			"editor/title": [
 				{
-					"command": "shadowReader.start",
+					"command": "statusbarReader.start",
 					"alt": "markdown.showPreviewToSide",
 					"group": "navigation"
 				}

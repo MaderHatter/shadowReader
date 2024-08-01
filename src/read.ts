@@ -6,6 +6,7 @@ import { TxtFileParser } from "./parse/txt";
 import { CrawelerDomains } from "./const";
 import { BiquWebParser } from "./parse/biqu";
 import { CaimoWebParser } from "./parse/caimo";
+import { parse } from "path";
 
 let bookPath: string = "";
 let parser: Parser;
@@ -43,7 +44,7 @@ function loadParser(context: ExtensionContext, bookPath: string): Parser {
 }
 
 export async function readNextLine(context: ExtensionContext): Promise<string> {
-  let pageSize: number = <number>workspace.getConfiguration().get("shadowReader.pageSize");
+  let pageSize: number = <number>workspace.getConfiguration().get("statusbarReader.pageSize");
   let content = await parser.getNextPage(pageSize);
   if (content.length === 0) {
     return readEOFTip;
@@ -54,7 +55,7 @@ export async function readNextLine(context: ExtensionContext): Promise<string> {
 }
 
 export async function readPrevLine(context: ExtensionContext): Promise<string> {
-  let pageSize: number = <number>workspace.getConfiguration().get("shadowReader.pageSize");
+  let pageSize: number = <number>workspace.getConfiguration().get("statusbarReader.pageSize");
   let content = await parser.getPrevPage(pageSize);
   let percent = parser.getPercent();
   context.globalState.update(bookPath, parser.getPersistHistory());
@@ -78,12 +79,17 @@ export function loadFile(context: ExtensionContext, newfilePath: string) {
   });
 }
 
-export async function searchContentToEnd(context: ExtensionContext, keyword: string): Promise<string> {
+export async function searchContentToEnd(context: ExtensionContext, keyword: string, type: number = 1): Promise<string> {
   let keywordIndex = 0;
   let preLineEndMatch = false;
-  let pageSize: number = <number>workspace.getConfiguration().get("shadowReader.pageSize");
+  let pageSize: number = <number>workspace.getConfiguration().get("statusbarReader.pageSize");
   while (true) {
-    let content = await parser.getNextPage(pageSize);
+    let content: string = "";
+    if(type){
+      content = await parser.getNextPage(pageSize);
+    }else{
+      content = await parser.getPrevPage(pageSize);
+    }
     if (content.length === 0) {
       break;
     }

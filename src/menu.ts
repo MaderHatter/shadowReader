@@ -1,7 +1,7 @@
 import { window, ExtensionContext, workspace } from "vscode";
 import path = require('path');
 import { checkFileDecodeOrConvert, bookLibraryKey, deleteFile } from "./store";
-import { loadFile, searchContentToEnd } from "./read";
+import { loadFile, searchContentToEnd as searchContent } from "./read";
 import { setStatusBarMsg } from "./util";
 import { Craweler } from "./crawler/interface";
 import { CrawelerDomains } from "./const";
@@ -17,6 +17,11 @@ enum Menu {
     newLocalBook = "本地书籍",
     deleteBook = "删除书籍",
     newOnlineBook = "网络书籍",
+}
+
+enum SearchType {
+    search = "搜索",
+    backSearch = "前向搜索"
 }
 
 function hasKey<O>(obj: O, key: keyof any): key is keyof O {
@@ -54,7 +59,7 @@ export async function showMainMenu(context: ExtensionContext) {
 }
 
 function newOnlineCraweler(): Craweler {
-    let bookURL = workspace.getConfiguration().get("shadowReader.onlineBookURL");
+    let bookURL = workspace.getConfiguration().get("statusbarReader.onlineBookURL");
     switch (bookURL) {
         case <string>CrawelerDomains.get("caimoURL"):
             return new CaimoCrawler();
@@ -66,13 +71,13 @@ function newOnlineCraweler(): Craweler {
 }
 
 async function newBookMenu(context: ExtensionContext) {
-    let newBookChoice = await window.showQuickPick([Menu.newLocalBook, Menu.newOnlineBook ], {
+    let newBookChoice = await window.showQuickPick([Menu.newLocalBook, Menu.newOnlineBook], {
         matchOnDescription: true,
     });
     switch (newBookChoice) {
         case Menu.newLocalBook:
             window.showOpenDialog().then((filePaths) => {
-            	if (filePaths && filePaths.length > 0) {
+                if (filePaths && filePaths.length > 0) {
                     window.showInputBox({
                         value: path.basename(filePaths[0].fsPath),
                         placeHolder: "别名",
@@ -84,12 +89,12 @@ async function newBookMenu(context: ExtensionContext) {
                             }
                         }
                     );
-            	}
+                }
             });
             break;
-    
+
         case Menu.newOnlineBook:
-            let onlineBookURL: string | undefined = workspace.getConfiguration().get("shadowReader.onlineBookURL");
+            let onlineBookURL: string | undefined = workspace.getConfiguration().get("statusbarReader.onlineBookURL");
             if (!onlineBookURL) {
                 window.showErrorMessage("onlineBookURL未配置");
                 return;
@@ -101,12 +106,12 @@ async function newBookMenu(context: ExtensionContext) {
                 if (bookFuzzyName) {
                     let crawler: Craweler = newOnlineCraweler();
                     let bookDict = await crawler.searchBook(bookFuzzyName);
-                    window.showQuickPick(Array.from(bookDict.keys()), {matchOnDescription: true}).then(async value => {
+                    window.showQuickPick(Array.from(bookDict.keys()), { matchOnDescription: true }).then(async value => {
                         if (value) {
                             let bookURL = <string>bookDict.get(value);
                             let chapterURLDict = await crawler.findChapterURL(bookURL);
-                            window.showQuickPick(Array.from(chapterURLDict.keys()), {matchOnDescription: true}).then( startChapter => {
-                                if(startChapter) {
+                            window.showQuickPick(Array.from(chapterURLDict.keys()), { matchOnDescription: true }).then(startChapter => {
+                                if (startChapter) {
                                     let bookLibraryDictString = context.globalState.get(bookLibraryKey, "{}");
                                     let bookLibraryDict = JSON.parse(bookLibraryDictString);
                                     bookLibraryDict[value] = bookURL;
@@ -123,7 +128,7 @@ async function newBookMenu(context: ExtensionContext) {
                     });
                 }
             });
-            
+
             break;
 
         default:
@@ -139,18 +144,37 @@ async function showBookLibraryList(context: ExtensionContext): Promise<string | 
     });
 }
 
-export function showSearchKeywordBox(context: ExtensionContext) {
-    window.showInputBox({
-        placeHolder: "注意：会自动跳转",
-        prompt: "按照内容向后搜索"
-    }).then(
-        keyWord => {
-            if (keyWord) {
-                let text = searchContentToEnd(context, keyWord).then(text => {
-                    setStatusBarMsg(text);
-                    window.showInformationMessage("搜索完成");
-                });
-            }
-        }
-    );
+export async function showSearchKeywordBox(context: ExtensionContext) {
+    let choice = await window.showQuickPick([SearchType.search, SearchType.backSearch], { matchOnDescription: true });
+    switch (choice) {
+        case SearchType.search:
+            window.showInputBox({
+                placeHolder: "注意：会自动跳转",
+                prompt: "按照内容向后搜索"
+            }).then(
+                keyWord => {
+                    if (keyWord) {
+                            searchContent(context, keyWord).then(text => {
+                            setStatusBarMsg(text);
+                            window.showInformationMessage("搜索完成");
+                        });
+                    }
+                }
+            );
+            return;
+        case SearchType.backSearch:
+            window.showInputBox({
+                placeHolder: "注意：会自动跳转",
+                prompt: "按照内容向前搜索"
+            }).then(
+                keyWord => {
+                    if (keyWord) {
+                            searchContent(context, keyWord, 0).then(text => {
+                            setStatusBarMsg(text);
+                            window.showInformationMessage("搜索完成");
+                        });
+                    }
+                }
+            );
+    }
 }

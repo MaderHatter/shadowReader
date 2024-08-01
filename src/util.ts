@@ -1,6 +1,6 @@
 import { StatusBarItem, window, workspace } from "vscode";
 
-export const searchToEndCommandID = "shadowReader.searchToEnd";
+export const searchToEndCommandID = "statusbarReader.searchToEnd";
 let myStatusBarItem: StatusBarItem = window.createStatusBarItem();
 myStatusBarItem.command = searchToEndCommandID;
 
@@ -31,7 +31,7 @@ function showNormalText() {
     if (timeoutInternal) {
         clearTimeout(timeoutInternal);
     }
-    let timeoutSecond = (<number>workspace.getConfiguration().get("shadowReader.hiddenTime")) * 1000;
+    let timeoutSecond = (<number>workspace.getConfiguration().get("statusbarReader.hiddenTime")) * 1000;
     timeoutInternal = setTimeout(showBossText, timeoutSecond);
 }
 

@@ -14,7 +14,7 @@ vscode插件市场，搜索`shadow reader`，安装
 
 ## Quick Start
 ### 主菜单（2选1）
-1. ctrl+shift+p，搜索`shadowReader:开始工作`
+1. ctrl+shift+p，搜索`statusbarReader:开始工作`
 ![feature X](./images/start.jpg)
 2. 点击右上角的图标
 ![feature X](./images/start_icon.png)
@@ -49,9 +49,9 @@ vscode插件市场，搜索`shadow reader`，安装
 ![feature X](./images/search.jpg)
 
 ## Extension Settings
-* `shadowReader.pageSize`：每次最多显示字数（默认50）
-* `shadowReader.onlineBookURL`：在线书源，当前已支持笔趣阁
-* `shadowReader.hiddenTime`：自动切换至老板状态时间（单位秒，默认30）
+* `statusbarReader.pageSize`：每次最多显示字数（默认50）
+* `statusbarReader.onlineBookURL`：在线书源，当前已支持笔趣阁
+* `statusbarReader.hiddenTime`：自动切换至老板状态时间（单位秒，默认30）
 * 修改快捷键：首选项 -- 键盘快捷方式
 ![feature X](./images/keybind.jpg)
 

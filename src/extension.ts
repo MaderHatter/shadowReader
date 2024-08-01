@@ -16,26 +16,26 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(searchKeyWordToEnd);
 
-	let getNextPage = vscode.commands.registerCommand("shadowReader.getNextPage", () => {
+	let getNextPage = vscode.commands.registerCommand("statusbarReader.getNextPage", () => {
 		readNextLine(context).then(text => {
 			setStatusBarMsg(text);
 		});
 	});
 	context.subscriptions.push(getNextPage);
 
-	let getPrevPage = vscode.commands.registerCommand("shadowReader.getPrevPage", () => {
+	let getPrevPage = vscode.commands.registerCommand("statusbarReader.getPrevPage", () => {
 		readPrevLine(context).then(text => {
 			setStatusBarMsg(text);
 		});
 	});
 	context.subscriptions.push(getPrevPage);
 
-	let startMain = vscode.commands.registerCommand("shadowReader.start", async () => {
+	let startMain = vscode.commands.registerCommand("statusbarReader.start", async () => {
 		await showMainMenu(context);
 	});
 	context.subscriptions.push(startMain);
 
-	let showBossInfo = vscode.commands.registerCommand("shadowReader.showBossInfo", () => {
+	let showBossInfo = vscode.commands.registerCommand("statusbarReader.showBossInfo", () => {
 		toggleBossMsg();
 	});
 	context.subscriptions.push(showBossInfo);
