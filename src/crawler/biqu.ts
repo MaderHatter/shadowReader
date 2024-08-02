@@ -13,8 +13,8 @@ const ignoreSSL = axios.create({
 
 function sleep(delay: number) {
     return new Promise(reslove => {
-      setTimeout(reslove, delay)
-    })
+      setTimeout(reslove, delay);
+    });
 }
 
 export class BiquCrawler implements Craweler {
@@ -83,4 +83,5 @@ export class BiquCrawler implements Craweler {
         });
         return choices;
     }
+
 }

@@ -1,13 +1,14 @@
 import { window, ExtensionContext, workspace } from "vscode";
 import path = require('path');
 import { checkFileDecodeOrConvert, bookLibraryKey, deleteFile } from "./store";
-import { loadFile, searchContentToEnd as searchContent } from "./read";
+import { loadFile, searchContent as searchContent } from "./read";
 import { setStatusBarMsg } from "./util";
 import { Craweler } from "./crawler/interface";
 import { CrawelerDomains } from "./const";
 import { BiquCrawler } from "./crawler/biqu";
 import { CaimoCrawler } from "./crawler/caimo";
 import { BookKind } from "./parse/model";
+import { TextDecoder } from "util";
 
 let bookLibraryDict: object = {};
 
@@ -145,36 +146,15 @@ async function showBookLibraryList(context: ExtensionContext): Promise<string | 
 }
 
 export async function showSearchKeywordBox(context: ExtensionContext) {
-    let choice = await window.showQuickPick([SearchType.search, SearchType.backSearch], { matchOnDescription: true });
-    switch (choice) {
-        case SearchType.search:
-            window.showInputBox({
-                placeHolder: "注意：会自动跳转",
-                prompt: "按照内容向后搜索"
-            }).then(
-                keyWord => {
-                    if (keyWord) {
-                            searchContent(context, keyWord).then(text => {
-                            setStatusBarMsg(text);
-                            window.showInformationMessage("搜索完成");
-                        });
-                    }
-                }
-            );
-            return;
-        case SearchType.backSearch:
-            window.showInputBox({
-                placeHolder: "注意：会自动跳转",
-                prompt: "按照内容向前搜索"
-            }).then(
-                keyWord => {
-                    if (keyWord) {
-                            searchContent(context, keyWord, 0).then(text => {
-                            setStatusBarMsg(text);
-                            window.showInformationMessage("搜索完成");
-                        });
-                    }
-                }
-            );
-    }
+    window.showInputBox({
+    }).then(
+        async keyWord => {
+            if (keyWord) {
+                searchContent(context, keyWord).then(text=>{
+                    setStatusBarMsg(text);
+                    window.showInformationMessage("Search Successful");
+                });
+            }
+        }
+    );
 }

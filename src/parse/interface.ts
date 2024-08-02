@@ -14,6 +14,14 @@ export interface Parser {
     // get percent info
     getPercent(): string;
 
+    //get percent from input index
+    getPercentFromInputIndex(index: number): string;
+
     // get persist read history, used to cache history
     getPersistHistory(): BookStore;
+
+    getPage(pageSize: number, startIndex: number): [string, number];
+
+    setReadCount(pageSize:number):void;
 }
+

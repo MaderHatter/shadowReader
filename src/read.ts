@@ -1,20 +1,21 @@
-import { workspace, ExtensionContext } from "vscode";
+import { workspace, ExtensionContext, window } from "vscode";
 import { setStatusBarMsg } from "./util";
 import { BookKind, BookStore } from "./parse/model";
-import { Parser } from "./parse/interface";
+import { Parser as LocalParser, Parser } from "./parse/interface";
 import { TxtFileParser } from "./parse/txt";
 import { CrawelerDomains } from "./const";
 import { BiquWebParser } from "./parse/biqu";
 import { CaimoWebParser } from "./parse/caimo";
-import { parse } from "path";
+import { parse, win32 } from "path";
 
 let bookPath: string = "";
 let parser: Parser;
 const readEOFTip = "";
 
 
-function loadParser(context: ExtensionContext, bookPath: string): Parser {
+function loadParser(context: ExtensionContext, bookPath: string): LocalParser {
   let store = context.globalState.get(bookPath, 0);
+  parser = new TxtFileParser(bookPath, context.globalState.get(bookPath, 0));
 
   let bookStore: BookStore;
   // compatible old version
@@ -30,11 +31,11 @@ function loadParser(context: ExtensionContext, bookPath: string): Parser {
   switch (bookStore.kind) {
     case BookKind.local:
       return new TxtFileParser(bookPath, bookStore.readedCount);
-    
+
     case BookKind.online:
-      if(bookStore.sectionPath?.startsWith(<string>CrawelerDomains.get("biquURL"))) {
+      if (bookStore.sectionPath?.startsWith(<string>CrawelerDomains.get("biquURL"))) {
         return new BiquWebParser(<string>bookStore.sectionPath, bookStore.readedCount, bookPath);
-      } else if(bookStore.sectionPath?.startsWith(<string>CrawelerDomains.get("caimoURL"))) {
+      } else if (bookStore.sectionPath?.startsWith(<string>CrawelerDomains.get("caimoURL"))) {
         return new CaimoWebParser(<string>bookStore.sectionPath, bookStore.readedCount, bookPath);
       }
       throw new Error("book url is not supported");
@@ -79,42 +80,44 @@ export function loadFile(context: ExtensionContext, newfilePath: string) {
   });
 }
 
-export async function searchContentToEnd(context: ExtensionContext, keyword: string, type: number = 1): Promise<string> {
+export async function searchContent(context: ExtensionContext, keyword: string): Promise<string> {
   let keywordIndex = 0;
   let preLineEndMatch = false;
+  let results: Array<[string, number]> = Array();
+  let result: string = "";
   let pageSize: number = <number>workspace.getConfiguration().get("statusbarReader.pageSize");
+  let count: number = 0;
   while (true) {
-    let content: string = "";
-    if(type){
-      content = await parser.getNextPage(pageSize);
-    }else{
-      content = await parser.getPrevPage(pageSize);
-    }
-    if (content.length === 0) {
+    let [content, bufferSize] = await parser.getPage(pageSize, count);
+    count += bufferSize;
+    if (content.length === 0 && bufferSize === 0) {
       break;
     }
+
 
     for (let char of content) {
       if (char === keyword[keywordIndex]) {
         keywordIndex++;
         if (keywordIndex === keyword.length) {
-          if (preLineEndMatch) {
-            return await readPrevLine(context);
-          } else {
-            let percent = parser.getPercent();
-            context.globalState.update(bookPath, parser.getPersistHistory());
-            return `${content}   ${percent}`;;
-          }
+          results.push([content, count]);
         }
       } else {
         keywordIndex = 0;
       }
     }
-
     // between two lines
     if (keywordIndex !== 0) {
       preLineEndMatch = true;
     }
   }
-  return readEOFTip;
+  const quickPickItems = results.map(([content, count]) => ({ label: content, description: count.toString() }));
+  await window.showQuickPick(quickPickItems).then(text => {
+    if (text !== undefined || text !== "") {
+      let percent = parser.getPercentFromInputIndex(Number(text?.description));
+      parser.setReadCount(Number(text?.description));
+      context.globalState.update(bookPath, parser.getPersistHistory());
+      result =  `${text?.label} ${percent}`;
+    }
+  });
+  return result;
 }

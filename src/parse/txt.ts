@@ -1,7 +1,7 @@
 import { openSync, closeSync, readSync, fstatSync } from "fs";
 import iconv = require('iconv-lite');
-import { BookKind, BookStore } from  "./model";
-import { Parser } from "./interface";
+import { BookKind, BookStore } from "./model";
+import { Parser} from "./interface";
 
 export class TxtFileParser implements Parser {
     private fd: number;
@@ -10,8 +10,8 @@ export class TxtFileParser implements Parser {
     private totalByteSize: number;
     private readedCount: number;
     private lastPageSize: number = 0;
-    
-    constructor (bookPath: string, readedCount: number) {
+
+    constructor(bookPath: string, readedCount: number) {
         this.fd = openSync(bookPath, 'r');
         this.totalByteSize = fstatSync(this.fd).size;
         this.readedCount = readedCount;
@@ -30,10 +30,10 @@ export class TxtFileParser implements Parser {
         let showText = iconv.decode(buffer, this.encoding);
         let lineBreakPosition = showText.indexOf('\n');
         if (lineBreakPosition !== -1) {
-            bufferSize = ( lineBreakPosition + 1) * this.stringMaxSize;
+            bufferSize = (lineBreakPosition + 1) * this.stringMaxSize;
             showText = showText.slice(0, lineBreakPosition);
         }
-        
+
         showText = showText.replace(/\r/g, '').trim();
         return [showText, bufferSize];
     }
@@ -50,6 +50,10 @@ export class TxtFileParser implements Parser {
         return '';
     }
 
+    setReadCount(pageSize: number): void {
+        this.readedCount = pageSize;
+    }
+
     getPrevPage(pageSize: number): Promise<string> {
         this.readedCount -= pageSize * 2 * this.stringMaxSize;
         if (this.readedCount < 0) {
@@ -62,10 +66,12 @@ export class TxtFileParser implements Parser {
         closeSync(this.fd);
     }
 
+    getPercentFromInputIndex(currentCount: number): string {
+        return `${(currentCount / this.totalByteSize * 100).toFixed(2)}%`;
+    }
     getPercent(): string {
         return `${(this.readedCount / this.totalByteSize * 100).toFixed(2)}%`;
     }
-
     getPersistHistory(): BookStore {
         return {
             kind: BookKind.local,

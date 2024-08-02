@@ -24,6 +24,15 @@ export class BiquWebParser implements Parser {
         this.readedCount = readedCount;
         this.indexPageURL = indexPageURL;
     }
+    getPercentFromInputIndex(index: number): string {
+        throw new Error("Method not implemented.");
+    }
+    getPage(pageSize: number, startIndex: number): [string, number] {
+        throw new Error("Method not implemented.");
+    }
+    setReadCount(pageSize: number): void {
+        throw new Error("Method not implemented.");
+    }
 
     close(): void {};
 
@@ -117,6 +126,7 @@ export class BiquWebParser implements Parser {
     getPercent(): string {
         return `${this.title}`;
     }
+
 
     getPersistHistory(): BookStore {
         return {
