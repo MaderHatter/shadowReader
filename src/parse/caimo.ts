@@ -28,9 +28,11 @@ export class CaimoWebParser implements Parser {
         const percent = (index / this.cacheText.length) * 100;
         return `${percent.toFixed(2)}%`;
     }
+    //@ts-ignore
     getPage(pageSize: number, startIndex: number): [string, number] {
         throw new Error("Method not implemented.");
     }
+    //@ts-ignore
     setReadCount(pageSize: number): void {
         throw new Error("Method not implemented.");
     }

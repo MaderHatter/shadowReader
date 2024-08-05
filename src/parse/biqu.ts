@@ -24,12 +24,15 @@ export class BiquWebParser implements Parser {
         this.readedCount = readedCount;
         this.indexPageURL = indexPageURL;
     }
+    //@ts-ignore
     getPercentFromInputIndex(index: number): string {
         throw new Error("Method not implemented.");
     }
+    //@ts-ignore
     getPage(pageSize: number, startIndex: number): [string, number] {
         throw new Error("Method not implemented.");
     }
+    //@ts-ignore
     setReadCount(pageSize: number): void {
         throw new Error("Method not implemented.");
     }

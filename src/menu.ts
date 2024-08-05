@@ -72,7 +72,7 @@ function newOnlineCraweler(): Craweler {
 }
 
 async function newBookMenu(context: ExtensionContext) {
-    let newBookChoice = await window.showQuickPick([Menu.newLocalBook, Menu.newOnlineBook], {
+    let newBookChoice = await window.showQuickPick([Menu.newLocalBook], {
         matchOnDescription: true,
     });
     switch (newBookChoice) {

@@ -10,7 +10,7 @@ import { CaimoWebParser } from "./parse/caimo";
 let bookPath: string = "";
 let parser: Parser;
 const readEOFTip = "";
-let preSearchResults: Array<[string, number]>;
+let preSearchResults: Map<string, number>;
 let preSearchKeyWord: string;
 
 
@@ -83,9 +83,10 @@ export function loadFile(context: ExtensionContext, newfilePath: string) {
 
 export async function searchContent(context: ExtensionContext, keyword: string): Promise<string> {
   let keywordIndex = 0;
-  let results: Array<[string, number]> = Array();
+  let results: Map<string, number> = new Map();
   let result: string = "";
   let pageSize: number = <number>workspace.getConfiguration().get("statusbarReader.pageSize");
+  let maxSearchCount: number = <number>workspace.getConfiguration().get("statusbarReader.maxSearchCount");
   let count: number = 0;
   while (true) {
     if(keyword === preSearchKeyWord){
@@ -98,8 +99,8 @@ export async function searchContent(context: ExtensionContext, keyword: string):
       break;
     }
 
-    if(results.length >= 100){
-      results.push(["搜索结果过多, 请详细关键字", -1]);
+    if(results.size >= maxSearchCount){
+      results.set("搜索结果过多, 请详细关键字", 0);
       break;
     }
     
@@ -108,7 +109,7 @@ export async function searchContent(context: ExtensionContext, keyword: string):
       if (char === keyword[keywordIndex]) {
         keywordIndex++;
         if (keywordIndex === keyword.length) {
-          results.push([content, count]);
+          results.set(content, count);
         }
       } else {
         keywordIndex = 0;
@@ -117,7 +118,7 @@ export async function searchContent(context: ExtensionContext, keyword: string):
   }
   preSearchResults = results;
   preSearchKeyWord = keyword;
-  const quickPickItems = results.map(([content, count]) => ({ label: content, description: count.toString() }));
+  const quickPickItems = Array.from(results).map(([content, count]) => ({ label: content, description: count.toString() }));
   await window.showQuickPick(quickPickItems).then(text => {
     if (text !== undefined) {
       let percent = parser.getPercentFromInputIndex(Number(text?.description));
