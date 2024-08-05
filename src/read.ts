@@ -6,11 +6,12 @@ import { TxtFileParser } from "./parse/txt";
 import { CrawelerDomains } from "./const";
 import { BiquWebParser } from "./parse/biqu";
 import { CaimoWebParser } from "./parse/caimo";
-import { parse, win32 } from "path";
 
 let bookPath: string = "";
 let parser: Parser;
 const readEOFTip = "";
+let preSearchResults: Array<[string, number]>;
+let preSearchKeyWord: string;
 
 
 function loadParser(context: ExtensionContext, bookPath: string): LocalParser {
@@ -82,18 +83,26 @@ export function loadFile(context: ExtensionContext, newfilePath: string) {
 
 export async function searchContent(context: ExtensionContext, keyword: string): Promise<string> {
   let keywordIndex = 0;
-  let preLineEndMatch = false;
   let results: Array<[string, number]> = Array();
   let result: string = "";
   let pageSize: number = <number>workspace.getConfiguration().get("statusbarReader.pageSize");
   let count: number = 0;
   while (true) {
+    if(keyword === preSearchKeyWord){
+      results = preSearchResults;
+      break;
+    }
     let [content, bufferSize] = await parser.getPage(pageSize, count);
     count += bufferSize;
     if (content.length === 0 && bufferSize === 0) {
       break;
     }
 
+    if(results.length >= 100){
+      results.push(["搜索结果过多, 请详细关键字", -1]);
+      break;
+    }
+    
 
     for (let char of content) {
       if (char === keyword[keywordIndex]) {
@@ -105,14 +114,12 @@ export async function searchContent(context: ExtensionContext, keyword: string):
         keywordIndex = 0;
       }
     }
-    // between two lines
-    if (keywordIndex !== 0) {
-      preLineEndMatch = true;
-    }
   }
+  preSearchResults = results;
+  preSearchKeyWord = keyword;
   const quickPickItems = results.map(([content, count]) => ({ label: content, description: count.toString() }));
   await window.showQuickPick(quickPickItems).then(text => {
-    if (text !== undefined || text !== "") {
+    if (text !== undefined) {
       let percent = parser.getPercentFromInputIndex(Number(text?.description));
       parser.setReadCount(Number(text?.description));
       context.globalState.update(bookPath, parser.getPersistHistory());

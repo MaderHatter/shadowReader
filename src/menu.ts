@@ -150,9 +150,11 @@ export async function showSearchKeywordBox(context: ExtensionContext) {
     }).then(
         async keyWord => {
             if (keyWord) {
-                searchContent(context, keyWord).then(text=>{
-                    setStatusBarMsg(text);
-                    window.showInformationMessage("Search Successful");
+                searchContent(context, keyWord).then(text => {
+                    if (text !== "") {
+                        setStatusBarMsg(text);
+                        window.showInformationMessage("Search Successful");
+                    }
                 });
             }
         }
